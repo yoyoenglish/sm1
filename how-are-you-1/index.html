@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How are you? · Yo Yo English</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --backdrop:#1F2B55; --backdrop2:#2A3A72; --curtain:#B8243F; --curtain-dark:#7E1429;
+  --floor:#8A5A34; --gold:#FFD35C; --ink:#1B1B2F; --paper:#FFFFFF;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;height:100%}
+body{
+  font-family:"Baloo 2","Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
+  color:var(--paper);
+  background:radial-gradient(ellipse at 50% 30%, var(--backdrop2) 0%, var(--backdrop) 70%);
+  display:flex;flex-direction:column;min-height:100%;
+}
+header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:12px 20px;
+}
+h1{margin:0;font-size:clamp(28px,4vw,46px);font-weight:800;line-height:1;letter-spacing:.5px;color:var(--gold)}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+nav button{
+  font:inherit;font-weight:700;font-size:clamp(16px,1.8vw,22px);
+  border:3px solid rgba(255,255,255,.35);background:transparent;color:var(--paper);
+  padding:4px 18px;border-radius:999px;cursor:pointer;
+}
+nav button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+button:focus-visible{outline:4px solid #fff;outline-offset:3px}
+
+main{flex:1;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px;padding:0 20px 16px;align-items:center}
+@media (max-width:800px){main{grid-template-columns:1fr}}
+
+/* stage */
+.stage{position:relative;aspect-ratio:1/1;max-height:74vh;width:100%;margin:auto;overflow:hidden;border-radius:18px 18px 8px 8px}
+.stage::before{ /* spotlight */
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 46%, rgba(255,243,196,.35) 0%, rgba(255,243,196,0) 58%);
+}
+.stage::after{ /* floor */
+  content:"";position:absolute;left:0;right:0;bottom:0;height:12%;
+  background:repeating-linear-gradient(90deg,var(--floor) 0 60px,#7a4d2b 60px 62px);
+  border-top:6px solid #5e3a1f;
+}
+#face{position:absolute;top:9%;left:4%;width:92%;height:79%;z-index:1}
+.curtain{
+  position:absolute;top:0;bottom:12%;width:50%;z-index:2;
+  background:repeating-linear-gradient(90deg,var(--curtain) 0 26px,var(--curtain-dark) 26px 34px,var(--curtain) 34px 52px);
+  transition:transform .7s cubic-bezier(.5,0,.2,1);
+  box-shadow:0 0 30px rgba(0,0,0,.5);
+}
+.curtain.l{left:0;transform:translateX(-100%)} .curtain.r{right:0;transform:translateX(100%)}
+.valance{position:absolute;top:0;left:0;right:0;height:9%;z-index:3;
+  background:radial-gradient(circle at 50% 0,var(--curtain) 60%,transparent 62%) 0 0/60px 100% repeat-x,var(--curtain-dark);
+  border-bottom:4px solid var(--gold)}
+
+/* controls */
+.panel{display:flex;flex-direction:column;gap:14px;align-items:stretch;min-width:0}
+.caption{
+  min-height:1.2em;font-weight:800;font-size:clamp(40px,6vw,86px);line-height:1.05;text-align:center;
+  color:var(--paper);text-shadow:0 4px 0 rgba(0,0,0,.25);
+}
+.caption.hidden{visibility:hidden}
+.hint{text-align:center;font-size:clamp(16px,1.6vw,22px);opacity:.8;margin:0}
+.big{
+  font:inherit;font-weight:800;font-size:clamp(26px,3.2vw,44px);
+  background:var(--gold);color:var(--ink);border:0;border-radius:22px;
+  padding:10px 20px;cursor:pointer;box-shadow:0 7px 0 #C79A1C;
+}
+.big:active{transform:translateY(5px);box-shadow:0 2px 0 #C79A1C}
+.big:disabled{opacity:.45;cursor:default}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.chip{
+  font:inherit;font-weight:700;font-size:clamp(17px,1.9vw,26px);color:var(--ink);
+  border:0;border-radius:16px;padding:6px 4px 4px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  box-shadow:0 5px 0 rgba(0,0,0,.28);
+}
+.chip svg{width:58%;max-width:84px;height:auto}
+.chip:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+.chip.wrong{animation:shake .45s}
+.chip.grey{background:#E7E3F2 !important}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.count{
+  width:clamp(90px,11vw,150px);aspect-ratio:1;margin:0 auto;border-radius:50%;
+  display:grid;place-items:center;font-weight:800;font-size:clamp(50px,7vw,96px);
+  background:var(--paper);color:var(--ink);
+}
+.count[hidden]{display:none}
+.mode{display:flex;flex-direction:column;gap:14px}
+.mode[hidden]{display:none}
+.row{display:flex;gap:10px}
+.row .big{flex:1}
+.pop{animation:pop .45s}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){
+  .curtain{transition:none}.pop,.chip.wrong{animation:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>How are you?</h1>
+  <nav aria-label="Game">
+    <button data-mode="learn" aria-pressed="true">Learn</button>
+    <button data-mode="spin" aria-pressed="false">Spin &amp; show</button>
+    <button data-mode="guess" aria-pressed="false">Curtain</button>
+  </nav>
+</header>
+
+<main>
+  <div class="stage" id="stage">
+    <svg id="face" viewBox="-130 -130 260 260" aria-hidden="true"></svg>
+    <div class="curtain l" id="curL"></div>
+    <div class="curtain r" id="curR"></div>
+    <div class="valance"></div>
+  </div>
+
+  <div class="panel">
+    <div class="caption" id="caption">I'm happy!</div>
+
+    <!-- LEARN -->
+    <section class="mode" id="m-learn">
+      <p class="hint">Tap a face. Listen and say.</p>
+      <div class="grid" id="learnGrid"></div>
+    </section>
+
+    <!-- SPIN -->
+    <section class="mode" id="m-spin" hidden>
+      <button class="big" id="spinBtn">How are you?</button>
+      <div class="count" id="count" hidden>5</div>
+      <p class="hint" id="spinHint">Press the button. Then show the face!</p>
+    </section>
+
+    <!-- GUESS -->
+    <section class="mode" id="m-guess" hidden>
+      <div class="row">
+        <button class="big" id="newBtn">New face</button>
+        <button class="big" id="peekBtn">Open a bit</button>
+      </div>
+      <div class="grid" id="guessGrid"></div>
+      <p class="hint" id="guessHint">Is it happy? Is it sad? Guess!</p>
+    </section>
+  </div>
+</main>
+
+<script>
+/* ---------- emotions ---------- */
+const E = {
+  happy:   {color:"#FBE77A", mouth:{w:40,y:38,c:28,tilt:0,wob:0}, eyeRy:22, pup:[0,2],  brow:{a:0,y:-60,dy:0}, extra:null},
+  sad:     {color:"#8FD8F0", mouth:{w:32,y:52,c:-18,tilt:0,wob:0}, eyeRy:21, pup:[0,6], brow:{a:-22,y:-54,dy:0}, extra:"tear"},
+  angry:   {color:"#F26B6B", mouth:{w:28,y:50,c:-14,tilt:0,wob:0}, eyeRy:16, pup:[0,2], brow:{a:26,y:-44,dy:0}, extra:"steam"},
+  confused:{color:"#F9A06B", mouth:{w:26,y:46,c:-4,tilt:10,wob:0}, eyeRy:20, pup:[10,-4], brow:{a:-10,y:-56,dy:14}, extra:"q"},
+  scared:  {color:"#7EE08E", mouth:{w:30,y:46,c:-4,tilt:0,wob:6},  eyeRy:26, pup:[0,-8], brow:{a:-26,y:-66,dy:0}, extra:"drop"},
+  tired:   {color:"#A98BEA", mouth:{w:22,y:46,c:-3,tilt:0,wob:0},  eyeRy:3,  pup:[0,0],  brow:{a:4,y:-44,dy:0}, extra:"zzz"}
+};
+const NAMES = Object.keys(E);
+const GREY = "#CFCBDD";
+
+/* ---------- face drawing ---------- */
+const NS="http://www.w3.org/2000/svg";
+function lerp(a,b,t){return a+(b-a)*t}
+function hex(c){return [1,3,5].map(i=>parseInt(c.slice(i,i+2),16))}
+function mixColor(a,b,t){const A=hex(a),B=hex(b);return "rgb("+A.map((v,i)=>Math.round(lerp(v,B[i],t))).join(",")+")"}
+
+function toParams(name,colorOverride){
+  const e=E[name];
+  return {color:colorOverride||e.color, mw:e.mouth.w,my:e.mouth.y,mc:e.mouth.c,mt:e.mouth.tilt,mwob:e.mouth.wob,
+    ery:e.eyeRy,px:e.pup[0],py:e.pup[1],ba:e.brow.a,by:e.brow.y,bdy:e.brow.dy,
+    tear:+(e.extra==="tear"),steam:+(e.extra==="steam"),q:+(e.extra==="q"),drop:+(e.extra==="drop"),zzz:+(e.extra==="zzz")};
+}
+function mixParams(A,B,t){
+  const o={};for(const k in A){o[k]= k==="color" ? mixColor(A.color.startsWith("#")?A.color:B.color, B.color, t) : lerp(A[k],B[k],t)}
+  if(!A.color.startsWith("#")) o.color=B.color;
+  return o;
+}
+function mouthPath(p){
+  let d="";const n=24;
+  for(let i=0;i<=n;i++){
+    const u=-1+2*i/n, x=u*p.mw;
+    const y=p.my + p.mc*(1-u*u) + p.mt*u + p.mwob*Math.sin(u*Math.PI*3);
+    d+=(i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1);
+  }
+  return d;
+}
+function faceSVG(p){
+  const eye=(cx,side)=>{
+    const ry=Math.max(p.ery,2), pr=Math.min(10,ry*0.55);
+    const lid = p.ery<6 ? `<path d="M${cx-18} ${-18} Q${cx} ${-10} ${cx+18} ${-18}" stroke="#1B1B2F" stroke-width="5" fill="none" stroke-linecap="round"/>` : "";
+    return (p.ery>=6?`<ellipse cx="${cx}" cy="-18" rx="17" ry="${ry}" fill="#fff" stroke="#1B1B2F" stroke-width="4"/>
+      <circle cx="${cx+p.px*side*(side<0?-1:1)}" cy="${-18+p.py}" r="${pr}" fill="#1B1B2F"/>
+      <circle cx="${cx+p.px+3}" cy="${-22+p.py}" r="${pr*0.3}" fill="#fff"/>`:"")+lid;
+  };
+  const brow=(cx,sign,extraY)=>`<line x1="${cx-18}" y1="${p.by+extraY}" x2="${cx+18}" y2="${p.by+extraY}" stroke="#1B1B2F" stroke-width="7" stroke-linecap="round" transform="rotate(${p.ba*sign} ${cx} ${p.by+extraY})"/>`;
+  return `
+  <circle cx="0" cy="0" r="100" fill="${p.color}" stroke="#1B1B2F" stroke-width="5"/>
+  <ellipse cx="-58" cy="22" rx="14" ry="8" fill="#ff7a8a" opacity=".35"/>
+  <ellipse cx="58" cy="22" rx="14" ry="8" fill="#ff7a8a" opacity=".35"/>
+  ${eye(-36,1)}${eye(36,1)}
+  ${brow(-36,1,0)}${brow(36,-1,-p.bdy)}
+  <path d="${mouthPath(p)}" stroke="#1B1B2F" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M-44 8 q-8 14 0 20 q8 -6 0 -20z" fill="#5BC0F8" stroke="#1B1B2F" stroke-width="2.5" opacity="${p.tear}"/>
+  <path d="M78 -62 q-10 16 0 22 q10 -6 0 -22z" fill="#9FE3FF" stroke="#1B1B2F" stroke-width="2.5" opacity="${p.drop}"/>
+  <g opacity="${p.steam}" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round">
+    <path d="M-86 -78 q-10 -10 0 -18 q10 -10 0 -18"/><path d="M86 -78 q10 -10 0 -18 q-10 -10 0 -18"/></g>
+  <text x="84" y="-78" font-size="56" font-weight="800" fill="#fff" stroke="#1B1B2F" stroke-width="2" font-family="Baloo 2, sans-serif" opacity="${p.q}">?</text>
+  <g opacity="${p.zzz}" font-family="Baloo 2, sans-serif" font-weight="800" fill="#fff" stroke="#1B1B2F" stroke-width="1.5">
+    <text x="66" y="-68" font-size="26">z</text><text x="82" y="-86" font-size="34">z</text><text x="100" y="-106" font-size="42">z</text></g>`;
+}
+
+/* ---------- big animated face ---------- */
+const faceEl=document.getElementById("face");
+let cur=toParams("happy"), anim=null;
+function drawNow(p){faceEl.innerHTML=faceSVG(p)}
+function morphTo(name,{grey=false,ms=420}={}){
+  const target=toParams(name,grey?GREY:null), from={...cur};
+  if(from.color.startsWith("rgb")) from.color=target.color; // keep lerp simple
+  cancelAnimationFrame(anim);
+  const t0=performance.now(), reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return new Promise(res=>{
+    const step=now=>{
+      let t=reduce?1:Math.min(1,(now-t0)/ms); t=1-Math.pow(1-t,3);
+      cur=mixParams(from,target,t); drawNow(cur);
+      if(t<1) anim=requestAnimationFrame(step); else {cur=target;res()}
+    };
+    anim=requestAnimationFrame(step);
+  });
+}
+function bump(){faceEl.classList.remove("pop");void faceEl.offsetWidth;faceEl.classList.add("pop")}
+
+/* ---------- voice ---------- */
+let voice=null;
+function pickVoice(){
+  const v=speechSynthesis.getVoices();
+  voice=v.find(x=>/en-GB/i.test(x.lang)&&/Daniel|Serena|Kate|Female|Google/i.test(x.name))
+     ||v.find(x=>/en-GB/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;
+}
+if("speechSynthesis" in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function say(text){
+  return new Promise(res=>{
+    if(!("speechSynthesis" in window)){res();return}
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    if(voice)u.voice=voice; u.lang=voice?voice.lang:"en-GB"; u.rate=.85; u.pitch=1.1;
+    u.onend=res;u.onerror=res; speechSynthesis.speak(u);
+    setTimeout(res,4000);
+  });
+}
+
+/* ---------- mini faces for buttons ---------- */
+function mini(name){return `<svg viewBox="-130 -130 260 260" aria-hidden="true">${faceSVG(toParams(name))}</svg>`}
+function buildGrid(el,onClick){
+  NAMES.forEach(n=>{
+    const b=document.createElement("button");
+    b.className="chip";b.style.background=E[n].color;b.dataset.name=n;
+    b.innerHTML=mini(n)+`<span>${n}</span>`;
+    b.addEventListener("click",()=>onClick(n,b));
+    el.appendChild(b);
+  });
+}
+
+/* ---------- UI helpers ---------- */
+const caption=document.getElementById("caption");
+function setCaption(t,hidden=false){caption.textContent=t;caption.classList.toggle("hidden",hidden)}
+const curL=document.getElementById("curL"),curR=document.getElementById("curR");
+function curtains(open){ // open: 0 closed .. 1 fully open
+  const shift=(-open*100).toFixed(0);
+  curL.style.transform=`translateX(${shift}%)`;curR.style.transform=`translateX(${-shift}%)`;
+}
+
+/* ---------- LEARN ---------- */
+buildGrid(document.getElementById("learnGrid"),async n=>{
+  setCaption(`I'm ${n}!`);
+  await morphTo(n);bump();
+  await say(n);await say(`I'm ${n}!`);
+});
+
+/* ---------- SPIN & SHOW ---------- */
+const spinBtn=document.getElementById("spinBtn"),countEl=document.getElementById("count"),spinHint=document.getElementById("spinHint");
+let last=null;
+spinBtn.addEventListener("click",async()=>{
+  spinBtn.disabled=true;setCaption("…",true);countEl.hidden=true;
+  say("How are you?");
+  let pick; do{pick=NAMES[Math.floor(Math.random()*NAMES.length)]}while(pick===last); last=pick;
+  // slot-machine flicker, slowing down
+  let delay=90,i=Math.floor(Math.random()*6);
+  while(delay<420){await morphTo(NAMES[i%6],{ms:delay*0.8});await new Promise(r=>setTimeout(r,delay*0.2));i++;delay*=1.18}
+  await morphTo(pick,{ms:450});bump();
+  spinHint.textContent="Show this face! 5… 4… 3…";
+  countEl.hidden=false;
+  for(let s=5;s>0;s--){countEl.textContent=s;await new Promise(r=>setTimeout(r,1000))}
+  countEl.hidden=true;
+  setCaption(`I'm ${pick}!`);spinHint.textContent="Say it together! Then press again.";
+  await say(`I'm ${pick}!`);
+  spinBtn.disabled=false;
+});
+
+/* ---------- CURTAIN (guess) ---------- */
+const peekBtn=document.getElementById("peekBtn"),newBtn=document.getElementById("newBtn"),guessHint=document.getElementById("guessHint");
+let secret=null,opened=0,solved=false;
+async function newRound(){
+  solved=false;opened=0;curtains(0);
+  document.querySelectorAll("#guessGrid .chip").forEach(c=>c.classList.remove("grey"));
+  setCaption("How are you?");guessHint.textContent="Is it happy? Is it sad? Guess!";
+  await new Promise(r=>setTimeout(r,700));
+  let pick;do{pick=NAMES[Math.floor(Math.random()*NAMES.length)]}while(pick===secret);secret=pick;
+  await morphTo(secret,{grey:true,ms:10});
+  opened=0.08;curtains(opened);peekBtn.disabled=false;
+  say("How are you?");
+}
+peekBtn.addEventListener("click",()=>{if(solved)return;opened=Math.min(0.75,opened+0.13);curtains(opened);if(opened>=0.75)peekBtn.disabled=true});
+newBtn.addEventListener("click",newRound);
+buildGrid(document.getElementById("guessGrid"),async(n,b)=>{
+  if(solved||!secret)return;
+  say(`Are you ${n}?`);
+  if(n===secret){
+    solved=true;curtains(1);peekBtn.disabled=true;
+    await new Promise(r=>setTimeout(r,500));
+    await morphTo(secret);bump();setCaption(`I'm ${secret}!`);guessHint.textContent="Yes! Press “New face”.";
+    await new Promise(r=>setTimeout(r,900));await say(`Yes! I'm ${secret}!`);
+  }else{
+    b.classList.remove("wrong");void b.offsetWidth;b.classList.add("wrong");b.classList.add("grey");
+    await new Promise(r=>setTimeout(r,900));await say("No, I'm not.");
+  }
+});
+
+/* ---------- modes ---------- */
+document.querySelectorAll("nav button").forEach(btn=>btn.addEventListener("click",()=>{
+  const m=btn.dataset.mode;
+  document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-pressed",b===btn));
+  ["learn","spin","guess"].forEach(k=>document.getElementById("m-"+k).hidden=k!==m);
+  if("speechSynthesis" in window)speechSynthesis.cancel();
+  countEl.hidden=true;spinBtn.disabled=false;
+  if(m==="guess"){newRound()}
+  else{curtains(1);morphTo("happy");setCaption(m==="learn"?"I'm happy!":"How are you?",m==="spin");
+       spinHint.textContent="Press the button. Then show the face!"}
+}));
+
+drawNow(cur);curtains(1);
+</script>
+</body>
+</html>
