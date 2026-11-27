@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shapes · Super Minds 1 · YoYo English</title>
+<style>
+:root{
+  --red:#E8262B; --yellow:#F2BD2B; --orange:#F7921E; --brown:#73513A; --green:#5DBB46;
+  --blue:#1BA6DE; --ink:#2b2b2b; --bg:#F4FAFD; --card:#fff; --shadow:0 6px 0 rgba(0,0,0,.08),0 10px 24px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:"Trebuchet MS","Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+button{font-family:inherit;cursor:pointer}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+header h1{margin:0;font-size:26px;flex:1}
+header h1 small{display:block;font-size:14px;color:#888;font-weight:normal}
+.stars{font-size:24px;font-weight:bold;background:#FFF5D6;border-radius:30px;padding:6px 16px}
+.toggle{border:2px solid #ddd;background:#fff;border-radius:30px;padding:8px 14px;font-size:15px}
+.toggle.on{border-color:var(--green);background:#EEF9EA}
+nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;padding:16px}
+nav button{border:none;border-radius:20px;padding:12px 20px;font-size:19px;background:#fff;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px}
+nav button.active{background:var(--blue);color:#fff}
+nav button b{display:inline-flex;width:30px;height:30px;border-radius:50%;background:#5DBB46;color:#fff;align-items:center;justify-content:center}
+main{max-width:1100px;margin:0 auto;padding:0 16px 40px}
+section{display:none}section.show{display:block}
+.task{display:flex;align-items:center;gap:14px;background:#fff;border-radius:22px;padding:14px 18px;box-shadow:var(--shadow);margin-bottom:20px}
+.task h2{margin:0;font-size:24px;flex:1}
+.task h2 span{display:block;font-size:16px;color:#777;font-weight:normal;margin-top:4px}
+.spk{border:none;background:var(--blue);color:#fff;width:58px;height:58px;border-radius:50%;font-size:28px;flex:none;box-shadow:0 4px 0 #0f7fae}
+.spk:active{transform:translateY(3px);box-shadow:0 1px 0 #0f7fae}
+.spk.small{width:40px;height:40px;font-size:18px;box-shadow:0 3px 0 #0f7fae}
+/* flashcards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:20px}
+.fc{perspective:1000px;height:270px}
+.fc-in{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.fc.flip .fc-in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--card);border-radius:24px;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;text-align:center}
+.back{transform:rotateY(180deg);background:#FFFBEA}
+.face svg{width:130px;height:130px}
+.word{font-size:30px;font-weight:bold;margin-top:8px}
+.def{font-size:19px;line-height:1.35;margin:6px 0}
+.flipbtn{position:absolute;top:10px;right:10px;border:none;background:#eee;border-radius:50%;width:40px;height:40px;font-size:20px}
+.rubtn{border:none;background:var(--red);color:#fff;width:46px;height:46px;border-radius:50%;font-weight:bold;font-size:16px;margin-top:6px}
+.ru{font-size:19px;color:var(--red);font-weight:bold;min-height:24px;margin-top:4px}
+.face .spk.small{position:absolute;top:10px;left:10px}
+.bigbtn{border:none;background:var(--green);color:#fff;font-size:22px;padding:14px 30px;border-radius:30px;box-shadow:0 5px 0 #3f9230;margin:10px auto;display:block}
+.bigbtn:active{transform:translateY(3px);box-shadow:0 2px 0 #3f9230}
+/* games */
+.stage{background:#fff;border-radius:26px;box-shadow:var(--shadow);padding:22px;text-align:center;min-height:380px;position:relative}
+.dots{display:flex;gap:7px;justify-content:center;margin-bottom:14px}
+.dots i{width:14px;height:14px;border-radius:50%;background:#e3e3e3}
+.dots i.ok{background:var(--green)}.dots i.cur{background:var(--blue)}
+.prompt{display:flex;align-items:center;justify-content:center;gap:14px;font-size:34px;font-weight:bold;margin:6px 0 18px}
+.shapes{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
+.sh{border:4px solid transparent;background:#F7F7F7;border-radius:22px;padding:10px;width:150px;height:150px;transition:transform .15s}
+.sh svg{width:100%;height:100%}
+.sh:hover{transform:scale(1.05)}
+.sh.good{border-color:var(--green);background:#EEF9EA;animation:pop .4s}
+.sh.bad{border-color:var(--red);animation:shake .4s}
+@keyframes pop{50%{transform:scale(1.15)}}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.feedback{min-height:56px;margin-top:18px;font-size:22px;border-radius:18px;padding:12px 16px;display:none}
+.feedback.ok{display:block;background:#EEF9EA;color:#2e7d1f}
+.feedback.no{display:block;background:#FDECEC;color:#b3261e}
+.bigshape{width:200px;height:200px;margin:0 auto}
+.sentence{font-size:34px;font-weight:bold;margin:10px 0 18px}
+.opts{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+.opt{display:flex;align-items:center;gap:8px;background:#F7F7F7;border:4px solid #e6e6e6;border-radius:22px;padding:8px 10px 8px 20px}
+.opt .w{border:none;background:none;font-size:28px;font-weight:bold;color:var(--ink);padding:6px 4px}
+.opt.good{border-color:var(--green);background:#EEF9EA}
+.opt.bad{border-color:var(--red);animation:shake .4s}
+.palette{display:flex;gap:16px;justify-content:center;margin:6px 0 20px}
+.blob{width:72px;height:72px;border-radius:50%;border:5px solid #fff;box-shadow:0 0 0 3px #ddd}
+.blob.sel{box-shadow:0 0 0 6px var(--ink);transform:scale(1.12)}
+.brush{font-size:18px;color:#777;margin-bottom:6px}
+.done{padding:30px 10px}
+.done .big{font-size:80px}
+.done h3{font-size:34px;margin:10px 0}
+.burst{position:fixed;pointer-events:none;font-size:34px;animation:fly 1s forwards;z-index:9}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) scale(.4);opacity:0}}
+@media(max-width:600px){.sh{width:110px;height:110px}.prompt,.sentence{font-size:26px}.blob{width:54px;height:54px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔺 Shapes <small>Super Minds 1 · YoYo English</small></h1>
+  <div class="stars">⭐ <span id="starCount">0</span></div>
+  <button class="toggle on" id="ruVoice">🔈 Русский голос: вкл</button>
+</header>
+
+<nav>
+  <button data-tab="t1" class="active"><b>1</b>🃏 Карточки</button>
+  <button data-tab="t2"><b>2</b>👂 Найди фигуру</button>
+  <button data-tab="t3"><b>3</b>🎨 Какого цвета?</button>
+  <button data-tab="t4"><b>4</b>🖌️ Раскрась</button>
+</nav>
+
+<main>
+  <!-- 1 -->
+  <section id="t1" class="show">
+    <div class="task">
+      <button class="spk" data-say="t1">🔊</button>
+      <h2>Listen and say!<span>Нажми на карточку — послушай и повтори. ↻ — перевернуть карточку.</span></h2>
+    </div>
+    <div class="cards" id="cards"></div>
+    <button class="bigbtn" id="playAll">▶ Послушать все слова</button>
+  </section>
+
+  <!-- 2 -->
+  <section id="t2">
+    <div class="task">
+      <button class="spk" data-say="t2">🔊</button>
+      <h2>Listen and find!<span>Послушай и нажми на нужную фигуру.</span></h2>
+    </div>
+    <div class="stage" id="g2"></div>
+  </section>
+
+  <!-- 3 -->
+  <section id="t3">
+    <div class="task">
+      <button class="spk" data-say="t3">🔊</button>
+      <h2>Read and match!<span>Какого цвета фигура? Нажми на слово. 🔊 рядом со словом — послушать его.</span></h2>
+    </div>
+    <div class="stage" id="g3"></div>
+  </section>
+
+  <!-- 4 -->
+  <section id="t4">
+    <div class="task">
+      <button class="spk" data-say="t4">🔊</button>
+      <h2>Listen and colour!<span>Послушай. Выбери цвет, потом нажми на фигуру.</span></h2>
+    </div>
+    <div class="stage" id="g4"></div>
+  </section>
+</main>
+
+<script>
+/* ---------- DATA ---------- */
+const SHAPES = [
+  {id:'triangle', ru:'треугольник', book:'green',
+   def:'It has three sides and three corners.', defRu:'У него три стороны и три угла.'},
+  {id:'circle', ru:'круг', book:'orange',
+   def:'It is round. It has no corners.', defRu:'Он круглый. У него нет углов.'},
+  {id:'kite', ru:'воздушный змей (фигура)', ruShort:'воздушный змей', book:'yellow',
+   def:'It looks like a toy in the sky. It has four sides.', defRu:'Похож на игрушку в небе. У него четыре стороны.'},
+  {id:'square', ru:'квадрат', book:'brown',
+   def:'It has four sides. All the sides are the same.', defRu:'У него четыре стороны. Все стороны одинаковые.'},
+  {id:'rectangle', ru:'прямоугольник', book:'red',
+   def:'It has four sides: two long and two short. It looks like a door.', defRu:'У него четыре стороны: две длинные и две короткие. Похож на дверь.'}
+];
+const COLORS = {
+  red:{hex:'#E8262B', ru:'красный'}, yellow:{hex:'#F2BD2B', ru:'жёлтый'},
+  orange:{hex:'#F7921E', ru:'оранжевый'}, brown:{hex:'#73513A', ru:'коричневый'},
+  green:{hex:'#5DBB46', ru:'зелёный'}
+};
+const COLOR_IDS = Object.keys(COLORS);
+const ruName = s => s.ruShort || s.ru;
+const byId = id => SHAPES.find(s=>s.id===id);
+
+function shapeSVG(id, fill, stroke){
+  const st = stroke ? `stroke="${stroke}" stroke-width="4" stroke-linejoin="round"` : '';
+  const f = `fill="${fill}" ${st}`;
+  const body = {
+    triangle:`<polygon points="50,8 94,88 6,88" ${f}/>`,
+    circle:`<circle cx="50" cy="50" r="42" ${f}/>`,
+    kite:`<polygon points="50,6 82,36 50,94 18,36" ${f}/>`,
+    square:`<rect x="14" y="14" width="72" height="72" ${f}/>`,
+    rectangle:`<rect x="4" y="24" width="92" height="52" ${f}/>`
+  }[id];
+  return `<svg viewBox="0 0 100 100" aria-label="${id}">${body}</svg>`;
+}
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+
+/* ---------- VOICE ---------- */
+let voices = [];
+function loadVoices(){ voices = speechSynthesis.getVoices(); }
+if('speechSynthesis' in window){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+const EN_PREF = ['Google UK English Female','Microsoft Sonia','Microsoft Libby','Microsoft Aria','Serena','Kate','Stephanie','Martha','Samantha','Karen','Moira','Tessa','Google US English'];
+const RU_PREF = ['Milena','Google русский','Microsoft Svetlana','Microsoft Dariya','Katya'];
+const voiceCache = {};
+function pickVoice(lang){
+  if(voiceCache[lang] && voices.includes(voiceCache[lang])) return voiceCache[lang];
+  const base = lang==='ru' ? 'ru' : 'en';
+  const pool = voices.filter(v=>v.lang && v.lang.toLowerCase().startsWith(base));
+  let v = pool.find(v=>/premium|enhanced|natural|neural/i.test(v.name) && (base==='ru' || /GB|US/i.test(v.lang)));
+  if(!v) for(const p of (base==='ru'?RU_PREF:EN_PREF)){ v = pool.find(x=>x.name.includes(p)); if(v) break; }
+  if(!v) v = pool.find(x=>/en-GB/i.test(x.lang)) || pool[0];
+  voiceCache[lang] = v; return v;
+}
+let ruVoiceOn = true;
+let sayTimer;
+/* parts: [[text,'en'|'ru'], ...] */
+function say(parts){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel(); clearTimeout(sayTimer);
+  sayTimer = setTimeout(()=>{
+    parts.forEach(([t,l])=>{
+      if(l==='ru' && !ruVoiceOn) return;
+      const u = new SpeechSynthesisUtterance(t);
+      const v = pickVoice(l);
+      if(v){ u.voice=v; u.lang=v.lang; } else u.lang = l==='ru'?'ru-RU':'en-GB';
+      u.rate = l==='ru' ? 1.0 : 0.82; u.pitch = 1.08;
+      speechSynthesis.speak(u);
+    });
+  }, 60);
+}
+const en = t => say([[t,'en']]);
+
+/* ---------- SOUND FX + STARS ---------- */
+let actx;
+function beep(ok){
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const notes = ok ? [660,880] : [220,180];
+    notes.forEach((f,i)=>{
+      const o=actx.createOscillator(), g=actx.createGain();
+      o.type = ok?'sine':'square'; o.frequency.value=f;
+      g.gain.setValueAtTime(.0001, actx.currentTime+i*.12);
+      g.gain.exponentialRampToValueAtTime(ok?.25:.08, actx.currentTime+i*.12+.02);
+      g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime+i*.12+.18);
+      o.connect(g).connect(actx.destination); o.start(actx.currentTime+i*.12); o.stop(actx.currentTime+i*.12+.2);
+    });
+  }catch(e){}
+}
+let stars = 0;
+function addStar(el){
+  stars++; document.getElementById('starCount').textContent = stars;
+  const r = el.getBoundingClientRect();
+  for(let i=0;i<6;i++){
+    const s=document.createElement('div'); s.className='burst'; s.textContent='⭐';
+    s.style.left=(r.left+r.width/2-17)+'px'; s.style.top=(r.top+r.height/2-17)+'px';
+    s.style.setProperty('--dx',(Math.random()*200-100)+'px'); s.style.setProperty('--dy',(Math.random()*-160-20)+'px');
+    document.body.appendChild(s); setTimeout(()=>s.remove(),1000);
+  }
+}
+function feedback(box, ok, html){
+  box.className = 'feedback ' + (ok?'ok':'no'); box.innerHTML = html;
+}
+
+/* ---------- NAV ---------- */
+const TASK_SAY = {
+  t1:[['Listen and say!','en'],['Нажми на карточку, послушай и повтори слово.','ru']],
+  t2:[['Listen and find!','en'],['Послушай и нажми на нужную фигуру.','ru']],
+  t3:[['Read and match!','en'],['Какого цвета фигура? Нажми на слово.','ru']],
+  t4:[['Listen and colour!','en'],['Послушай. Выбери цвет, потом нажми на фигуру.','ru']]
+};
+document.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>say(TASK_SAY[b.dataset.say]));
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('show',s.id===b.dataset.tab));
+  speechSynthesis && speechSynthesis.cancel();
+});
+const ruBtn = document.getElementById('ruVoice');
+ruBtn.onclick = ()=>{ ruVoiceOn=!ruVoiceOn; ruBtn.classList.toggle('on',ruVoiceOn); ruBtn.textContent='🔈 Русский голос: '+(ruVoiceOn?'вкл':'выкл'); };
+
+/* ---------- 1. FLASHCARDS ---------- */
+const cardsBox = document.getElementById('cards');
+SHAPES.forEach(s=>{
+  const c = document.createElement('div'); c.className='fc';
+  const col = COLORS[s.book].hex;
+  c.innerHTML = `<div class="fc-in">
+    <div class="face front">
+      <button class="spk small" title="Послушать">🔊</button>
+      <button class="flipbtn" title="Перевернуть">↻</button>
+      ${shapeSVG(s.id,col)}<div class="word">${s.id}</div>
+    </div>
+    <div class="face back">
+      <button class="spk small" title="Послушать">🔊</button>
+      <button class="flipbtn" title="Перевернуть">↻</button>
+      <div class="word" style="font-size:24px">${s.id}</div>
+      <div class="def">${s.def}</div>
+      <button class="rubtn" title="Перевод">RU</button>
+      <div class="ru"></div>
+    </div></div>`;
+  const front=c.querySelector('.front'), back=c.querySelector('.back');
+  front.onclick = e=>{ if(e.target.closest('.flipbtn')) return; en(s.id); };
+  back.onclick = e=>{ if(e.target.closest('.flipbtn,.rubtn')) return; say([[s.id,'en'],[s.def,'en']]); };
+  c.querySelectorAll('.flipbtn').forEach(b=>b.onclick=e=>{
+    e.stopPropagation(); c.classList.toggle('flip');
+    if(c.classList.contains('flip')) say([[s.id,'en'],[s.def,'en']]);
+  });
+  const ruBox = back.querySelector('.ru');
+  back.querySelector('.rubtn').onclick = e=>{
+    e.stopPropagation();
+    if(ruBox.textContent){ ruBox.textContent=''; return; }
+    ruBox.textContent = s.ru; say([[ruName(s),'ru'],[s.defRu,'ru']]);
+  };
+  cardsBox.appendChild(c);
+});
+document.getElementById('playAll').onclick = ()=>say(SHAPES.flatMap(s=>[[s.id,'en']]));
+
+/* ---------- helpers for games ---------- */
+function dots(n, cur, results){
+  return `<div class="dots">${Array.from({length:n},(_,i)=>`<i class="${results[i]?'ok':(i===cur?'cur':'')}"></i>`).join('')}</div>`;
+}
+function finish(stage, got, total, again){
+  const great = got===total;
+  stage.innerHTML = `<div class="done"><div class="big">${great?'🏆':'🌟'}</div>
+    <h3>${great?'Excellent!':'Well done!'}</h3>
+    <p style="font-size:24px">С первой попытки: <b>${got} из ${total}</b> ⭐</p>
+    <button class="bigbtn">🔁 Ещё раз</button></div>`;
+  say([[great?'Excellent!':'Well done!','en'],[`Ты справился! С первой попытки ${got} из ${total}.`,'ru']]);
+  stage.querySelector('.bigbtn').onclick = again;
+}
+function startScreen(stage, text, go){
+  stage.innerHTML = `<div class="done"><div class="big">▶️</div><h3>${text}</h3><button class="bigbtn">Начать!</button></div>`;
+  stage.querySelector('.bigbtn').onclick = go;
+}
+
+/* ---------- 2. LISTEN AND FIND ---------- */
+const g2 = document.getElementById('g2');
+function game2(){
+  const rounds = [...shuffle(SHAPES.map(s=>s.id)), ...shuffle(SHAPES.map(s=>s.id))];
+  let i=0, firstTry=0; const res=[];
+  function round(){
+    if(i>=rounds.length) return finish(g2, firstTry, rounds.length, game2);
+    const target = rounds[i]; let missed=false, locked=false;
+    const cols = shuffle(COLOR_IDS);
+    const order = shuffle(SHAPES.map(s=>s.id));
+    g2.innerHTML = dots(rounds.length,i,res) +
+      `<div class="prompt"><button class="spk">🔊</button> Find the ❓</div>
+       <div class="shapes">${order.map((id,k)=>`<button class="sh" data-id="${id}">${shapeSVG(id,COLORS[cols[k]].hex)}</button>`).join('')}</div>
+       <div class="feedback"></div>`;
+    const fb = g2.querySelector('.feedback');
+    const ask = ()=>en(`Find the ${target}!`);
+    g2.querySelector('.prompt .spk').onclick = ask; ask();
+    g2.querySelectorAll('.sh').forEach(b=>b.onclick=()=>{
+      if(locked) return;
+      const id=b.dataset.id, t=byId(target), p=byId(id);
+      if(id===target){
+        locked=true; b.classList.add('good'); beep(true);
+        if(!missed){ firstTry++; res[i]=true; addStar(b); }
+        g2.querySelector('.prompt').innerHTML = `<button class="spk">🔊</button> ${target}!`;
+        feedback(fb,true,`✅ Молодец! <b>${target}</b> — это ${t.ru}.`);
+        say([[`Yes! The ${target}!`,'en'],[`Молодец! ${ruName(t)}.`,'ru']]);
+        setTimeout(()=>{i++;round();}, 2600);
+      } else {
+        missed=true; b.classList.remove('bad'); void b.offsetWidth; b.classList.add('bad'); beep(false);
+        feedback(fb,false,`❌ Это <b>${id}</b> — ${p.ru}. А нам нужен <b>${target}</b>. Послушай ещё раз и попробуй снова!`);
+        say([[id,'en'],[`Это ${ruName(p)}. Попробуй ещё раз!`,'ru'],[`Find the ${target}!`,'en']]);
+      }
+    });
+  }
+  round();
+}
+startScreen(g2,'Слушай и находи фигуры!',game2);
+
+/* ---------- 3. READ AND MATCH (colours, as in Activity 2) ---------- */
+const g3 = document.getElementById('g3');
+function game3(){
+  const rounds = shuffle(SHAPES.map(s=>s.id));
+  let i=0, firstTry=0; const res=[];
+  function round(){
+    if(i>=rounds.length) return finish(g3, firstTry, rounds.length, game3);
+    const s = byId(rounds[i]); let missed=false, locked=false;
+    g3.innerHTML = dots(rounds.length,i,res) +
+      `<div class="bigshape">${shapeSVG(s.id,COLORS[s.book].hex)}</div>
+       <div class="sentence"><button class="spk small">🔊</button> The ${s.id} is <span id="blank">…</span></div>
+       <div class="opts">${shuffle(COLOR_IDS).map(c=>`<div class="opt" data-c="${c}"><button class="w">${c}</button><button class="spk small" title="Послушать">🔊</button></div>`).join('')}</div>
+       <div class="feedback"></div>`;
+    const fb = g3.querySelector('.feedback');
+    const ask = ()=>en(`The ${s.id} is...`);
+    g3.querySelector('.sentence .spk').onclick = ask; ask();
+    g3.querySelectorAll('.opt').forEach(o=>{
+      const c=o.dataset.c;
+      o.querySelector('.spk').onclick = ()=>en(c);
+      o.querySelector('.w').onclick = ()=>{
+        if(locked) return;
+        if(c===s.book){
+          locked=true; o.classList.add('good'); beep(true);
+          if(!missed){ firstTry++; res[i]=true; addStar(o); }
+          document.getElementById('blank').textContent = c+'.';
+          document.getElementById('blank').style.color = COLORS[c].hex;
+          feedback(fb,true,`✅ Верно! <b>The ${s.id} is ${c}.</b> — ${s.ru.replace(' (фигура)','')} ${COLORS[c].ru}.`);
+          say([[`Yes! The ${s.id} is ${c}.`,'en'],[`Верно! ${ruName(s)} ${COLORS[c].ru}.`,'ru']]);
+          setTimeout(()=>{i++;round();}, 3200);
+        } else {
+          missed=true; o.classList.remove('bad'); void o.offsetWidth; o.classList.add('bad'); beep(false);
+          feedback(fb,false,`❌ <b>${c}</b> — это ${COLORS[c].ru}. Посмотри внимательно на цвет фигуры и попробуй ещё раз!`);
+          say([[c,'en'],[`${c} — это ${COLORS[c].ru}. Посмотри на цвет фигуры!`,'ru']]);
+        }
+      };
+    });
+  }
+  round();
+}
+startScreen(g3,'Какого цвета фигуры?',game3);
+
+/* ---------- 4. LISTEN AND COLOUR ---------- */
+const g4 = document.getElementById('g4');
+function game4(){
+  // 8 random shape–colour pairs, each shape at least once
+  const ids = shuffle([...SHAPES.map(s=>s.id), ...shuffle(SHAPES.map(s=>s.id)).slice(0,3)]);
+  const rounds = ids.map(id=>({id, c: COLOR_IDS[Math.floor(Math.random()*COLOR_IDS.length)]}));
+  let i=0, firstTry=0; const res=[];
+  function round(){
+    if(i>=rounds.length) return finish(g4, firstTry, rounds.length, game4);
+    const r = rounds[i], s=byId(r.id); let missed=false, locked=false, sel=null;
+    const order = shuffle(SHAPES.map(x=>x.id));
+    g4.innerHTML = dots(rounds.length,i,res) +
+      `<div class="prompt"><button class="spk">🔊</button> Listen!</div>
+       <div class="brush">Выбери цвет 🎨</div>
+       <div class="palette">${COLOR_IDS.map(c=>`<button class="blob" data-c="${c}" style="background:${COLORS[c].hex}" title="${c}"></button>`).join('')}</div>
+       <div class="shapes">${order.map(id=>`<button class="sh" data-id="${id}">${shapeSVG(id,'#fff','#333')}</button>`).join('')}</div>
+       <div class="feedback"></div>`;
+    const fb = g4.querySelector('.feedback');
+    const ask = ()=>en(`The ${r.id} is ${r.c}.`);
+    g4.querySelector('.prompt .spk').onclick = ask; ask();
+    g4.querySelectorAll('.blob').forEach(b=>b.onclick=()=>{
+      if(locked) return;
+      sel=b.dataset.c; g4.querySelectorAll('.blob').forEach(x=>x.classList.toggle('sel',x===b)); en(sel);
+    });
+    g4.querySelectorAll('.sh').forEach(b=>b.onclick=()=>{
+      if(locked) return;
+      const id=b.dataset.id, p=byId(id);
+      if(!sel){ feedback(fb,false,'🎨 Сначала выбери цвет — нажми на кружок с краской!'); say([['Сначала выбери цвет.','ru']]); return; }
+      if(id===r.id && sel===r.c){
+        locked=true; b.innerHTML=shapeSVG(id,COLORS[sel].hex,'#333'); b.classList.add('good'); beep(true);
+        if(!missed){ firstTry++; res[i]=true; addStar(b); }
+        g4.querySelector('.prompt').innerHTML = `<button class="spk">🔊</button> The ${r.id} is ${r.c}.`;
+        feedback(fb,true,`✅ Отлично! <b>The ${r.id} is ${r.c}.</b> — ${ruName(s)} ${COLORS[r.c].ru}.`);
+        say([[`Great! The ${r.id} is ${r.c}.`,'en'],[`Отлично! ${ruName(s)} ${COLORS[r.c].ru}.`,'ru']]);
+        setTimeout(()=>{i++;round();}, 3000);
+        return;
+      }
+      missed=true; b.classList.remove('bad'); void b.offsetWidth; b.classList.add('bad'); beep(false);
+      let msg, voice;
+      if(id!==r.id && sel!==r.c){
+        msg=`❌ Это <b>${id}</b> (${p.ru}), и цвет не тот. Послушай ещё раз!`;
+        voice=`Это ${ruName(p)}, и цвет не тот. Послушай ещё раз!`;
+      } else if(id!==r.id){
+        msg=`❌ Цвет верный, а фигура нет: это <b>${id}</b> — ${p.ru}. Послушай, какую фигуру раскрасить!`;
+        voice=`Цвет верный, а фигура нет. Это ${ruName(p)}.`;
+      } else {
+        msg=`❌ Фигура верная, а цвет нет: <b>${sel}</b> — это ${COLORS[sel].ru}. Послушай, какой нужен цвет!`;
+        voice=`Фигура верная, а цвет нет. ${sel} — это ${COLORS[sel].ru}.`;
+      }
+      feedback(fb,false,msg);
+      say([[voice,'ru'],[`The ${r.id} is ${r.c}.`,'en']]);
+    });
+  }
+  round();
+}
+startScreen(g4,'Слушай и раскрашивай!',game4);
+</script>
+</body>
+</html>
